@@ -2,15 +2,13 @@ const express = require('express');
 const router = express.Router();
 const userModel = require('../Models/user');
 const postModel = require('../Models/post');
-const upload=require ("../config/multerconfig")
+const upload = require("../config/multerconfig")
 
-const jwt=require('jsonwebtoken')
-const bcrypt=require('bcrypt')
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
 
-const cookieParser = require('cookie-parser');
-const path=require('path')
 
-router.use("/images/uploads", express.static(path.join(__dirname, "images/uploads")));
+const path = require('path')
 
 router.get('/logout', (req, res) => {
   res.clearCookie("token");
@@ -20,16 +18,16 @@ router.get('/logout', (req, res) => {
 
 router.get("/allposts", isloggedin, async (req, res) => {
   try {
-        const userId = req.user.userid;
+    const userId = req.user.userid;
 
     const posts = await postModel
       .find({})
       .sort({ date: -1 }) // newest first
       .populate("user", "username profilepic").populate("comments.user", "username")
-; // include user info
-      const loggedInUser = await userModel.findById(userId);
+      ; // include user info
+    const loggedInUser = await userModel.findById(userId);
 
-    res.status(200).json({ posts,user: loggedInUser });
+    res.status(200).json({ posts, user: loggedInUser });
   } catch (err) {
     console.error("Error fetching all posts:", err);
     res.status(500).json({ error: "Failed to load posts" });
@@ -37,45 +35,57 @@ router.get("/allposts", isloggedin, async (req, res) => {
 });
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-router.post('/register',async (req,res)=>{
-    let {email,password,name,username}=req.body
- let user=await userModel.findOne({email:email})  /*left wala data base mai email aur right waha jo body me mila */
-    if(user) return res.status(500).send("User already exist")
-      bcrypt.genSalt(10,(err,salt)=>{
-    bcrypt.hash(password,salt, async (err,hash)=>{
-       let user= await userModel.create({
+router.post('/register', async (req, res) => {
+  let { email, password, name, username } = req.body
+  let user = await userModel.findOne({ email: email })  /*left wala data base mai email aur right waha jo body me mila */
+  if (user) return res.status(500).send("User already exist")
+  bcrypt.genSalt(10, (err, salt) => {
+    bcrypt.hash(password, salt, async (err, hash) => {
+      let user = await userModel.create({
         username,
         email,
         name,
-        password:hash
-       })
-       let token=jwt.sign({email:email,userid:user._id},"shhhh")
-       res.cookie("token",token)
-       res.send("registered")
+        password: hash
+      })
+      let token = jwt.sign({ email: email, userid: user._id }, process.env.JWT_SECRET || 'shhhh')
+      console.log(token);
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true, // set to true in production with HTTPS
+        sameSite: 'none', // important for cross-origin
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      })
+      res.send("registered")
     })
   })
 })
 
-router.post('/login',async (req,res)=>{
-    let {email,password}=req.body
-    console.log(req.body)
- let user=await userModel.findOne({email:email})  /*left wala data base mai email aur right waha jo body me mila */
-    if(!user) return res.status(500).send("Kuch galat hai")
-     
-      bcrypt.compare(password,user.password, function(err,result){
-        if(result){ 
-              console.log("user to mil gaya")
-          let token=jwt.sign({email:email,userid:user._id},"shhhh")
-           res.cookie("token",token);
-           console.log("User found:", user);
-         return(
-    
-           res.status(200).json({ user })
-           
-        );
-        }
-          res.status(401).send("Wrong password");
-      })
+router.post('/login', async (req, res) => {
+  let { email, password } = req.body
+  console.log(req.body)
+  let user = await userModel.findOne({ email: email })  /*left wala data base mai email aur right waha jo body me mila */
+  if (!user) return res.status(500).send("Kuch galat hai")
+
+  bcrypt.compare(password, user.password, function (err, result) {
+    if (result) {
+      console.log("user to mil gaya")
+      let token = jwt.sign({ email: email, userid: user._id }, process.env.JWT_SECRET || 'shhhh')
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true, // set to true in production with HTTPS
+        sameSite: 'none', // important for cross-origin
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      });
+      console.log("User found:", user);
+      console.log(token);
+      return (
+
+        res.status(200).json({ user })
+
+      );
+    }
+    res.status(401).send("Wrong password");
+  })
 })
 
 router.get('/profile', isloggedin, async (req, res) => {
