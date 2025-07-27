@@ -18,7 +18,7 @@ app.use(cors({
   origin: process.env.ORIGIN || 'https://frontend-phi-one-55.vercel.app',  // React frontend origin
   credentials: true                 // allow sending cookies
 }));
-console.log(process.env.ORIGINKA);
+console.log(process.env.ORIGIN);
 app.use(cookieParser());
 app.use(express.json()); // <-- add this line before your routes
 app.use(express.urlencoded({ extended: true }));
