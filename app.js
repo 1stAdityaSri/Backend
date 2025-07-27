@@ -15,10 +15,10 @@ connectDB();
 
 
 app.use(cors({
-  origin: process.env.ORIGIN || 'https://frontend-phi-one-55.vercel.app',  // React frontend origin
+  origin: process.env.ORIGINKA || 'https://frontend-phi-one-55.vercel.app',  // React frontend origin
   credentials: true                 // allow sending cookies
 }));
-console.log(process.env.ORIGIN);
+console.log(process.env.ORIGINKA);
 app.use(cookieParser());
 app.use(express.json()); // <-- add this line before your routes
 app.use(express.urlencoded({ extended: true }));
