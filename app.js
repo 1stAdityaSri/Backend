@@ -23,7 +23,7 @@ app.use('/images/uploads', express.static(path.join(__dirname, 'images/uploads')
 
 
 app.use(cors({
-  origin: process.env.ORIGINKA,  // React frontend origin
+  origin:'https://frontend-phi-one-55.vercel.app' ,  // React frontend origin
   credentials: true                 // allow sending cookies
 }));
 
