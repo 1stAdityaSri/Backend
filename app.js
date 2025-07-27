@@ -15,7 +15,7 @@ connectDB();
 
 
 app.use(cors({
-  origin: process.env.ORIGINKA || 'https://frontend-phi-one-55.vercel.app',  // React frontend origin
+  origin: process.env.ORIGIN || 'https://frontend-phi-one-55.vercel.app',  // React frontend origin
   credentials: true                 // allow sending cookies
 }));
 console.log(process.env.ORIGINKA);
